@@ -1,57 +1,42 @@
-# Rigol oscilloscope waveform library
+# This repository is now frozen.
 
-## Background
+The files are pure python code and still available.  However, I decided to use kaitai struct because it supported more languages than just python.  The repository is now at
 
-This project is designed to be a one-stop location for interpreting waveform `.wmf` files from all Rigol scopes.  Programs that parse Rigol's binary `.wfm` files are sadly balkanized: each project tends to support a single scope model and the available efforts are spread across a wide range of languages.
-
-Most seem to avoid do not deal specifically with the `.wfm` format and if they do, then only one specific scope model is supported.
-
-Initially, I too, was only interested in a single scope format (DS1102E) and I successfully used the python parser written by Blaicher <https://github.com/mabl/pyRigolWFM>.  Later, I noticed that 1000Z files were supported by the Szkutnik  <https://github.com/michal-szkutnik/pyRigolWfm1000Z> and added support for these scopes.  Later, I found the DS1000D Matlab code by Wagenaars <https://www.mathworks.com/matlabcentral/fileexchange/18999-read-binary-rigol-waveforms>.
-Eventually, I ran across the work on DS4000 files by Cat-Ion <https://github.com/Cat-Ion/rigol-ds4000-wfm>.
-
-This last project leveraged Kaitai Struct <https://kaitai.io> as a domain specific language to represent the binary files.  Once the binary waveform files have been described as a `.ksy` files then parsers can be generated for a wide range of languages (C++/STL, C#, Go, Java, JavaScript, Lua, Perl, PHP, Python, and Ruby).  Moreover, Kaitai Struct has a Web IDE <https://ide.kaitai.io> that allows one to interactively reverse engineer binary file formats.  This is super helpful for those Rigol `.wfm` formats that are undocumented.
-
-## Status
-
-There is a bit of work remaining (testing, validation, repackaging) but at least there are now binary file descriptions for `.wfm` files created by
-
-* DS1000C untested
-* DS1000E tested
-* DS1000Z tested, wonky voltages
-* DS4000 tested
-* DS6000 untested
-
-This has been a bit of an adventure.  In the process of nailing down the basic formats, I have gleaned information from a wide range of projects started by others.
-
-* Shein's Pascal program <https://sourceforge.net/projects/wfmreader>
-* Wagenaars's Matlab script <https://www.mathworks.com/matlabcentral/fileexchange/18999-read-binary-rigol-waveforms>
-* Steele's C program <http://nsweb.tn.tudelft.nl/~gsteele/rigol2dat>
-* Blaicher python code <https://github.com/mabl/pyRigolWFM>
-* Szkutnik python code <https://github.com/michal-szkutnik/pyRigolWfm1000Z>
-* Cat-Ion python code <https://github.com/Cat-Ion/rigol-ds4000-wfm>
-* A LabView program I got from Rigol support
-* Rigol's own documentation for 1000Z and 6000 file formats.
+The new one is at https://github.com/scottprahl/RigolWFM
 
 
-## Usage
+# Rigol DS1000E and DS1000Z series oscilloscope waveform library
 
-Right now the first version of python module that supports 1000E and 1000Z formats (this is the pre-Kaitai Struct version!) can be installed via `pip`::
+This is a fork of the work done by Blaicher and Szkutnik to create a command-line utility for converting Rigol waveform files to other formats.  The primary purpose of this fork is to create a module that can be installed via `pip`::
 
     pip install RigolWFM
 
-Once this is done, one can extract signals from binary Rigol `.wfm` files by::
+Once this is done, one can extract signals from binary Rigol `.wfm` files easily::
 
     import matplotlib.pyplot as plt
-    import RigolWFM.wfm as rigol
+    import RigolWFM.wfm as wfm
 
-    w = rigol.Wfm.from_file('OneChannelFile.wfm', 'DS1000E')
-    ch = w.channel[0]
-    plt.plot(ch.times, ch.volts)
+    t, y = wfm.signals('OneChannelFile.wfm')
+    plt.plot(t,y)
     plt.show()
 
-    w = rigol.Wfm.from_file('TwoChannelFile.wfm', 'DS1000Z')
-    for ch in w.channels:
-        plt.plot(ch.times, ch.volts, label=ch.name)
-    plt.legend(loc='top right')
+    t, y1, y2 = wfm.signals('TwoChannelFile.wfm')
+    plt.plot(t,y)
     plt.show()
 
+
+## Rigol DS1000E Scopes
+
+The parsing code to read these `.wfm` files from these scopes is written by Blaicher <https://github.com/mabl/pyRigolWFM>.  The code has been tested by me to work on files from the DS1102E and DS1052E.
+
+## Rigol DS1000Z
+
+The parsing code to read these `.wfm` files from these scopes is written by Szkutnik  <https://github.com/mabl/pyRigolWFM>.  Since I don't have one of these scopes this exact code is currently untested, but it may still work. Szkutnik does warn
+
+1. the calculated voltage values are wrong
+2. the WFM file format can change with firmware.  Only versions 00.04.01.SP2, 00.04.02.SP4 and 00.04.03.SP2 have been tested by Szkutnik with a DS1054Z
+3. the logic analyzer functions
+
+## Rigol DS1000C and DS1000D
+
+Unfortunately there is no python code, but in the `doc` directory are C and Matlab codes to parse `.wfm` files for those scopes.  Anyone who decides to write a python parser might want consider using `wfm_view` at <http://meteleskublesku.cz/wfm_view/> (although this was created specifically to reverse engineer the DS1052E).
