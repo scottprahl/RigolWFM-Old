@@ -9,7 +9,7 @@ The new one is at https://github.com/scottprahl/RigolWFM
 
 This is a fork of the work done by Blaicher and Szkutnik to create a command-line utility for converting Rigol waveform files to other formats.  The primary purpose of this fork is to create a module that can be installed via `pip`::
 
-    pip install RigolWFM
+    pip install -Iv RigolWFM==0.3.0
 
 Once this is done, one can extract signals from binary Rigol `.wfm` files easily::
 
